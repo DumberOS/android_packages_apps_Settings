@@ -27,7 +27,9 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.VisibleForTesting;
@@ -245,7 +247,44 @@ public class TopLevelSettings extends DashboardFragment implements SplitLayoutLi
         RecyclerView recyclerView = super.onCreateRecyclerView(inflater, parent,
                 savedInstanceState);
         recyclerView.setPadding(mPaddingHorizontal, 0, mPaddingHorizontal, 0);
+        recyclerView.setOnKeyListener((v, keyCode, event) -> {
+            if (event.getAction() != KeyEvent.ACTION_DOWN) {
+                return false;
+            }
+            if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
+                final View focusedChild = recyclerView.getFocusedChild();
+                if (focusedChild == null) {
+                    return false;
+                }
+                final RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+                if (layoutManager == null) {
+                    return false;
+                }
+                if (layoutManager.getPosition(focusedChild) == 0) {
+                    final View searchBar = findSearchBarView();
+                    if (searchBar != null && searchBar.requestFocus()) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        });
         return recyclerView;
+    }
+
+    private View findSearchBarView() {
+        if (getActivity() == null) {
+            return null;
+        }
+        final View searchBar = getActivity().findViewById(R.id.search_action_bar);
+        if (searchBar != null && searchBar.isShown()) {
+            return searchBar;
+        }
+        final View twoPaneSearchBar = getActivity().findViewById(R.id.search_action_bar_two_pane);
+        if (twoPaneSearchBar != null && twoPaneSearchBar.isShown()) {
+            return twoPaneSearchBar;
+        }
+        return null;
     }
 
     /** Sets the horizontal padding */
