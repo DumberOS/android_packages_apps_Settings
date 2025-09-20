@@ -41,6 +41,7 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.FeatureFlagUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -58,6 +59,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.window.embedding.SplitController;
 import androidx.window.embedding.SplitInfo;
 import androidx.window.embedding.SplitRule;
@@ -372,12 +374,104 @@ public class SettingsHomepageActivity extends FragmentActivity implements
         final Toolbar toolbar = findViewById(R.id.search_action_bar);
         FeatureFactory.getFeatureFactory().getSearchFeatureProvider()
                 .initSearchToolbar(this /* activity */, toolbar, SettingsEnums.SETTINGS_HOMEPAGE);
+        toolbar.setFocusable(true);
+        toolbar.setFocusableInTouchMode(false);
+        toolbar.setOnKeyListener((v, keyCode, event) -> handleSearchBarDpad(keyCode, event));
 
         if (mIsEmbeddingActivityEnabled) {
             final Toolbar toolbarTwoPaneVersion = findViewById(R.id.search_action_bar_two_pane);
             FeatureFactory.getFeatureFactory().getSearchFeatureProvider()
                     .initSearchToolbar(this /* activity */, toolbarTwoPaneVersion,
                             SettingsEnums.SETTINGS_HOMEPAGE);
+            toolbarTwoPaneVersion.setFocusable(true);
+            toolbarTwoPaneVersion.setFocusableInTouchMode(false);
+            toolbarTwoPaneVersion.setOnKeyListener(
+                    (v, keyCode, event) -> handleSearchBarDpad(keyCode, event));
+        }
+    }
+
+    private boolean handleHomepageContainerDpad(int keyCode, KeyEvent event) {
+        if (event.getAction() != KeyEvent.ACTION_DOWN) {
+            return false;
+        }
+        if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+            return moveFocusToHomepageList(/* focusLastItem= */ false);
+        } else if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
+            return moveFocusToHomepageList(/* focusLastItem= */ true);
+        }
+        return false;
+    }
+
+    private boolean handleSearchBarDpad(int keyCode, KeyEvent event) {
+        if (event.getAction() != KeyEvent.ACTION_DOWN) {
+            return false;
+        }
+        if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+            return moveFocusToHomepageList(/* focusLastItem= */ false);
+        }
+        return false;
+    }
+
+    private boolean moveFocusToHomepageList(boolean focusLastItem) {
+        if (mMainFragment == null) {
+            return false;
+        }
+        final RecyclerView recyclerView = mMainFragment.getListView();
+        if (recyclerView == null) {
+            return false;
+        }
+        final RecyclerView.Adapter<?> adapter = recyclerView.getAdapter();
+        if (adapter == null) {
+            return false;
+        }
+        final int itemCount = adapter.getItemCount();
+        if (itemCount <= 0) {
+            return false;
+        }
+
+        final int position = focusLastItem ? itemCount - 1 : 0;
+        requestFocusOnRecyclerViewPosition(recyclerView, position, /* onFocused= */ null);
+        return true;
+    }
+
+    private void requestFocusOnRecyclerViewPosition(RecyclerView recyclerView, int position,
+            Runnable onFocused) {
+        recyclerView.setFocusable(true);
+        recyclerView.setFocusableInTouchMode(false);
+        recyclerView.requestFocus();
+        recyclerView.scrollToPosition(position);
+        recyclerView.post(new RecyclerViewFocusRunnable(recyclerView, position, onFocused));
+    }
+
+    private static final class RecyclerViewFocusRunnable implements Runnable {
+        private static final int MAX_ATTEMPTS = 10;
+
+        private final RecyclerView mRecyclerView;
+        private final int mPosition;
+        private final Runnable mOnFocused;
+        private int mAttempts;
+
+        RecyclerViewFocusRunnable(RecyclerView recyclerView, int position, Runnable onFocused) {
+            mRecyclerView = recyclerView;
+            mPosition = position;
+            mOnFocused = onFocused;
+        }
+
+        @Override
+        public void run() {
+            RecyclerView.ViewHolder holder =
+                    mRecyclerView.findViewHolderForAdapterPosition(mPosition);
+            if (holder != null) {
+                holder.itemView.requestFocus();
+                if (mOnFocused != null) {
+                    mRecyclerView.post(mOnFocused);
+                }
+                return;
+            }
+            if (mAttempts++ >= MAX_ATTEMPTS) {
+                return;
+            }
+            mRecyclerView.post(this);
         }
     }
 
@@ -705,6 +799,7 @@ public class SettingsHomepageActivity extends FragmentActivity implements
         // Prevent inner RecyclerView gets focus and invokes scrolling.
         view.setFocusableInTouchMode(true);
         view.requestFocus();
+        view.setOnKeyListener((v, keyCode, event) -> handleHomepageContainerDpad(keyCode, event));
     }
 
     private void updateHomepageAppBar() {
