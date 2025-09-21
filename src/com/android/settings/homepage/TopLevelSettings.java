@@ -31,8 +31,10 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 
 import androidx.annotation.VisibleForTesting;
+import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -269,6 +271,26 @@ public class TopLevelSettings extends DashboardFragment implements SplitLayoutLi
             }
             return false;
         });
+
+        final ViewTreeObserver.OnGlobalFocusChangeListener focusChangeListener =
+                (oldFocus, newFocus) -> ensureRecyclerViewItemVisible(recyclerView, newFocus);
+        recyclerView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(View v) {
+                v.getViewTreeObserver().addOnGlobalFocusChangeListener(focusChangeListener);
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View v) {
+                final ViewTreeObserver observer = v.getViewTreeObserver();
+                if (observer.isAlive()) {
+                    observer.removeOnGlobalFocusChangeListener(focusChangeListener);
+                }
+            }
+        });
+        if (recyclerView.isAttachedToWindow()) {
+            recyclerView.getViewTreeObserver().addOnGlobalFocusChangeListener(focusChangeListener);
+        }
         return recyclerView;
     }
 
@@ -412,6 +434,34 @@ public class TopLevelSettings extends DashboardFragment implements SplitLayoutLi
         }
 
         void doForEach(Preference preference);
+    }
+
+    private void ensureRecyclerViewItemVisible(RecyclerView recyclerView, View newFocus) {
+        if (newFocus == null || recyclerView == null) {
+            return;
+        }
+        if (!ViewCompat.isLaidOut(recyclerView) || !recyclerView.isAttachedToWindow()) {
+            return;
+        }
+        final RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+        if (layoutManager == null || !layoutManager.canScrollVertically()) {
+            return;
+        }
+        final View itemView = recyclerView.findContainingItemView(newFocus);
+        if (itemView == null) {
+            return;
+        }
+
+        final int parentTop = recyclerView.getPaddingTop();
+        final int parentBottom = recyclerView.getHeight() - recyclerView.getPaddingBottom();
+        final int decoratedTop = layoutManager.getDecoratedTop(itemView);
+        final int decoratedBottom = layoutManager.getDecoratedBottom(itemView);
+
+        if (decoratedTop < parentTop) {
+            recyclerView.scrollBy(0, decoratedTop - parentTop);
+        } else if (decoratedBottom > parentBottom) {
+            recyclerView.scrollBy(0, decoratedBottom - parentBottom);
+        }
     }
 
     public static final BaseSearchIndexProvider SEARCH_INDEX_DATA_PROVIDER =
