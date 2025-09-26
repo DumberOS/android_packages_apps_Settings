@@ -22,7 +22,6 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.text.LineBreakConfig;
 import android.os.Bundle;
@@ -34,15 +33,14 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Toolbar;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.FragmentActivity;
 
 import com.android.settings.R;
 import com.android.settings.SetupWizardUtils;
 import com.android.settings.SubSettings;
 import com.android.settings.core.CategoryMixin.CategoryHandler;
+import com.android.settings.widget.AppBarUtils;
 import com.android.settingslib.core.lifecycle.HideNonSystemOverlayMixin;
 import com.android.settingslib.transition.SettingsTransitionHelper.TransitionType;
 
@@ -265,22 +263,7 @@ public class SettingsBaseActivity extends FragmentActivity implements CategoryHa
     }
 
     private void autoSetCollapsingToolbarLayoutScrolling() {
-        if (mAppBarLayout == null) {
-            return;
-        }
-        final CoordinatorLayout.LayoutParams params =
-                (CoordinatorLayout.LayoutParams) mAppBarLayout.getLayoutParams();
-        final AppBarLayout.Behavior behavior = new AppBarLayout.Behavior();
-        behavior.setDragCallback(
-                new AppBarLayout.Behavior.DragCallback() {
-                    @Override
-                    public boolean canDrag(@NonNull AppBarLayout appBarLayout) {
-                        // Header can be scrolling while device in landscape mode.
-                        return appBarLayout.getResources().getConfiguration().orientation
-                                == Configuration.ORIENTATION_LANDSCAPE;
-                    }
-                });
-        params.setBehavior(behavior);
+        AppBarUtils.configureAppBarLayout(mAppBarLayout);
     }
 
     private int getTransitionType(Intent intent) {

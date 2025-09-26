@@ -86,7 +86,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.annotation.WorkerThread;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -157,6 +156,7 @@ import com.android.settings.notification.app.AppNotificationSettings;
 import com.android.settings.spa.SpaActivity;
 import com.android.settings.spa.app.appinfo.AppInfoSettingsProvider;
 import com.android.settings.spa.app.appinfo.CloneAppInfoSettingsProvider;
+import com.android.settings.widget.AppBarUtils;
 import com.android.settings.widget.LoadingViewController;
 import com.android.settings.wifi.AppStateChangeWifiStateBridge;
 import com.android.settings.wifi.ChangeWifiStateDetails;
@@ -1028,18 +1028,7 @@ public class ManageApplications extends InstrumentedFragment
     }
 
     private void autoSetCollapsingToolbarLayoutScrolling() {
-        final CoordinatorLayout.LayoutParams params =
-                (CoordinatorLayout.LayoutParams) mAppBarLayout.getLayoutParams();
-        final AppBarLayout.Behavior behavior = new AppBarLayout.Behavior();
-        behavior.setDragCallback(
-                new AppBarLayout.Behavior.DragCallback() {
-                    @Override
-                    public boolean canDrag(@NonNull AppBarLayout appBarLayout) {
-                        return appBarLayout.getResources().getConfiguration().orientation
-                                == Configuration.ORIENTATION_LANDSCAPE;
-                    }
-                });
-        params.setBehavior(behavior);
+        AppBarUtils.configureAppBarLayout(mAppBarLayout);
     }
 
     /**

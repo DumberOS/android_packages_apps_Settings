@@ -65,6 +65,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.NotificationExpandButton;
 import com.android.settings.R;
 import com.android.settings.notification.NotificationBackend;
+import com.android.settings.widget.AppBarUtils;
 import com.android.settingslib.collapsingtoolbar.CollapsingToolbarBaseActivity;
 import com.android.settingslib.utils.StringUtil;
 import com.android.settingslib.utils.ThreadUtils;
@@ -244,6 +245,7 @@ public class NotificationHistoryActivity extends CollapsingToolbarBaseActivity {
         super.onCreate(savedInstanceState);
         setTitle(R.string.notification_history);
         setContentView(R.layout.notification_history);
+        AppBarUtils.configureAppBarLayout(findViewById(R.id.app_bar));
         mTodayView = findViewById(R.id.apps);
         mSnoozeView = findViewById(R.id.snoozed_list);
         mDismissView = findViewById(R.id.recently_dismissed_list);

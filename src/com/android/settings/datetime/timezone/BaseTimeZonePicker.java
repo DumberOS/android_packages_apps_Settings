@@ -29,7 +29,6 @@ import android.widget.SearchView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -38,6 +37,8 @@ import com.android.settings.R;
 import com.android.settings.core.InstrumentedFragment;
 import com.android.settings.datetime.timezone.model.TimeZoneData;
 import com.android.settings.datetime.timezone.model.TimeZoneDataLoader;
+
+import com.android.settings.widget.AppBarUtils;
 
 import com.google.android.material.appbar.AppBarLayout;
 
@@ -196,17 +197,6 @@ public abstract class BaseTimeZonePicker extends InstrumentedFragment
     }
 
     private void autoSetCollapsingToolbarLayoutScrolling() {
-        CoordinatorLayout.LayoutParams params =
-                (CoordinatorLayout.LayoutParams) mAppBarLayout.getLayoutParams();
-        AppBarLayout.Behavior behavior = new AppBarLayout.Behavior();
-        behavior.setDragCallback(
-                new AppBarLayout.Behavior.DragCallback() {
-                    @Override
-                    public boolean canDrag(@NonNull AppBarLayout appBarLayout) {
-                        return appBarLayout.getResources().getConfiguration().orientation
-                                == Configuration.ORIENTATION_LANDSCAPE;
-                    }
-                });
-        params.setBehavior(behavior);
+        AppBarUtils.configureAppBarLayout(mAppBarLayout);
     }
 }
