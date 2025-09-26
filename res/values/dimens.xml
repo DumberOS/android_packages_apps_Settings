@@ -96,8 +96,6 @@
     <dimen name="multiple_users_user_icon_size">40dp</dimen>
 
     <!-- Homepage -->
-    <dimen name="homepage_title_margin_bottom">8dp</dimen>
-    <dimen name="homepage_title_margin_horizontal">24dp</dimen>
     <dimen name="homepage_padding_horizontal_two_pane">24dp</dimen>
     <dimen name="homepage_preference_corner_radius">28dp</dimen>
     <dimen name="homepage_preference_min_height">88sp</dimen>

@@ -87,6 +87,7 @@ import com.android.settingslib.RestrictedLockUtils;
 import com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.collapsingtoolbar.CollapsingToolbarBaseActivity;
+import com.android.settings.widget.AppBarUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -350,6 +351,7 @@ public class DeviceAdminAdd extends CollapsingToolbarBaseActivity {
             return;
         }
         setContentView(R.layout.device_admin_add);
+        AppBarUtils.configureAppBarLayout(findViewById(R.id.app_bar));
 
         mAdminIcon = (ImageView) findViewById(R.id.admin_icon);
         mAdminName = (TextView) findViewById(R.id.admin_name);
