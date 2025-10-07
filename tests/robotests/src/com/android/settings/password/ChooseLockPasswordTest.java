@@ -457,25 +457,25 @@ public class ChooseLockPasswordTest {
         TextView securityMessage =
                 passwordActivity.findViewById(R.id.auto_pin_confirm_security_message);
 
-        passwordEntry.setText("1234");
+        passwordEntry.setText("123");
         fragment.updateUi();
         assertThat(pinAutoConfirmOption.getVisibility()).isEqualTo(View.GONE);
         assertThat(securityMessage.getVisibility()).isEqualTo(View.GONE);
         assertThat(pinAutoConfirmOption.isChecked()).isFalse();
 
-        passwordEntry.setText("123456");
+        passwordEntry.setText("1234");
         fragment.updateUi();
         assertThat(pinAutoConfirmOption.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(securityMessage.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(pinAutoConfirmOption.isChecked()).isTrue();
 
-        passwordEntry.setText("12345678");
+        passwordEntry.setText("12345");
         fragment.updateUi();
         assertThat(pinAutoConfirmOption.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(securityMessage.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(pinAutoConfirmOption.isChecked()).isFalse();
 
-        passwordEntry.setText("123456");
+        passwordEntry.setText("1234");
         fragment.updateUi();
         assertThat(pinAutoConfirmOption.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(securityMessage.getVisibility()).isEqualTo(View.VISIBLE);
@@ -493,7 +493,7 @@ public class ChooseLockPasswordTest {
         TextView securityMessage =
                 passwordActivity.findViewById(R.id.auto_pin_confirm_security_message);
 
-        passwordEntry.setText("123456");
+        passwordEntry.setText("1234");
         fragment.updateUi();
         assertThat(pinAutoConfirmOption.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(securityMessage.getVisibility()).isEqualTo(View.VISIBLE);
@@ -502,13 +502,13 @@ public class ChooseLockPasswordTest {
         pinAutoConfirmOption.performClick();
         assertThat(pinAutoConfirmOption.isChecked()).isFalse();
 
-        passwordEntry.setText("12345678");
+        passwordEntry.setText("12345");
         fragment.updateUi();
         assertThat(pinAutoConfirmOption.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(securityMessage.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(pinAutoConfirmOption.isChecked()).isFalse();
 
-        passwordEntry.setText("123456");
+        passwordEntry.setText("1234");
         fragment.updateUi();
         assertThat(pinAutoConfirmOption.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(securityMessage.getVisibility()).isEqualTo(View.VISIBLE);
