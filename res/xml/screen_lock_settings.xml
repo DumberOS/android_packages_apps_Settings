@@ -42,6 +42,11 @@
         android:summary="@string/lock_screen_auto_pin_confirm_summary" />
 
     <SwitchPreferenceCompat
+        android:key="wake_on_numeric_key"
+        android:title="@string/lock_screen_wake_on_numeric_key_title"
+        android:summary="@string/lock_screen_wake_on_numeric_key_summary" />
+
+    <SwitchPreferenceCompat
         android:key="enhancedPinPrivacy"
         android:title="@string/lockpattern_settings_enhanced_pin_privacy_title"
         android:summary="@string/lockpattern_settings_enhanced_pin_privacy_summary" />
