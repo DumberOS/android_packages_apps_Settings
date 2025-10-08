@@ -1457,6 +1457,10 @@
     <string name="lock_screen_auto_pin_confirm_title">Auto-confirm unlock</string>
     <!-- Summary of the lock screen auto pin confirm setting. [CHAR LIMIT=NONE] -->
     <string name="lock_screen_auto_pin_confirm_summary">Unlock automatically once you enter the correct PIN. This is slightly less secure than tapping Enter to confirm.</string>
+    <!-- Title of the setting to wake the device when numeric keys are pressed while using a PIN. [CHAR LIMIT=NONE] -->
+    <string name="lock_screen_wake_on_numeric_key_title">Wake screen with PIN keys</string>
+    <!-- Summary of the setting to wake the device when numeric keys are pressed while using a PIN. [CHAR LIMIT=NONE] -->
+    <string name="lock_screen_wake_on_numeric_key_summary">Turn on the screen when pressing number keys so you can start entering your PIN right away.</string>
     <!-- Message shown to check auto pin confirmation feature when the user is updating the PIN. [CHAR LIMIT=NONE] -->
     <string name="auto_pin_confirm_user_message">Auto-confirm correct PIN</string>
     <!-- Message shown to explain the security concern if a user opts-in to the auto-pin feature. [CHAR LIMIT=NONE] -->
