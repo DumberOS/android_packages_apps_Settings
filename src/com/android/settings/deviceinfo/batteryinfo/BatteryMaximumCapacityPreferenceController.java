@@ -22,6 +22,7 @@ import android.os.BatteryManager;
 
 import com.android.settings.R;
 import com.android.settings.core.BasePreferenceController;
+import com.android.settings.fuelgauge.BatteryCapacityOverride;
 import com.android.settingslib.fuelgauge.BatteryUtils;
 
 /**
@@ -40,6 +41,11 @@ public class BatteryMaximumCapacityPreferenceController extends BasePreferenceCo
 
     @Override
     public CharSequence getSummary() {
+        if (BatteryCapacityOverride.isEnabled()) {
+            final int capacity = BatteryCapacityOverride.getCapacityMah();
+            return mContext.getString(R.string.battery_maximum_capacity_summary, capacity, 100);
+        }
+
         Intent batteryIntent = BatteryUtils.getBatteryIntent(mContext);
         final int maxCapacityUah =
                 batteryIntent.getIntExtra(BatteryManager.EXTRA_MAXIMUM_CAPACITY, -1);
