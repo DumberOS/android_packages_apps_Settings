@@ -91,12 +91,17 @@ public class KeyboardSettings extends DashboardFragment {
                 new VirtualKeyboardPreferenceController(context);
         final PhysicalKeyboardPreferenceController physicalKeyboardPreferenceController =
                 new PhysicalKeyboardPreferenceController(context, lifecycle);
+        final KeyboardBacklightTogglePreferenceController keyboardBacklightTogglePreferenceController =
+                new KeyboardBacklightTogglePreferenceController(context,
+                        "keyboard_backlight_enabled");
         controllers.add(virtualKeyboardPreferenceController);
         controllers.add(physicalKeyboardPreferenceController);
+        controllers.add(keyboardBacklightTogglePreferenceController);
         controllers.add(new PreferenceCategoryController(context,
                 KEY_KEYBOARDS_CATEGORY).setChildren(
                 Arrays.asList(virtualKeyboardPreferenceController,
-                        physicalKeyboardPreferenceController)));
+                        physicalKeyboardPreferenceController,
+                        keyboardBacklightTogglePreferenceController)));
 
         // Pointer
         final PointerSpeedController pointerController = new PointerSpeedController(context);
