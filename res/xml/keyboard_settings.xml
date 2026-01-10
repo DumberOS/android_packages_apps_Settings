@@ -31,6 +31,14 @@
             android:key="physical_keyboard_pref"
             android:title="@string/physical_keyboard_title"
             android:summary="@string/summary_placeholder"/>
+
+        <SwitchPreferenceCompat
+            android:key="keyboard_backlight_enabled"
+            android:title="@string/keyboard_backlight_title"
+            android:summary="@string/keyboard_backlight_summary"
+            android:defaultValue="true"
+            android:persistent="false"
+            settings:controller="com.android.settings.inputmethod.KeyboardBacklightTogglePreferenceController" />
     </PreferenceCategory>
 
     <PreferenceCategory
