@@ -60,6 +60,17 @@ public class SoundSettings extends DashboardFragment implements OnActivityResult
 
     private static final String EXTRA_OPEN_PHONE_RINGTONE_PICKER =
             "EXTRA_OPEN_PHONE_RINGTONE_PICKER";
+    private static final String KEY_REDUCE_VOIP_EARPIECE_VOLUME = "reduce_voip_earpiece_volume";
+    private static final String KEY_FIX_WHATSAPP_MICROPHONE = "fix_whatsapp_microphone";
+    private static final String KEY_REDUCE_TELEPHONY_EARPIECE_VOLUME =
+            "reduce_telephony_earpiece_volume";
+    private static final String PHH_STATE_DIR = "/metadata/phh";
+    private static final String DISABLE_FILE_REDUCE_VOIP_EARPIECE_VOLUME =
+            PHH_STATE_DIR + "/disable_voip_earpiece";
+    private static final String DISABLE_FILE_FIX_WHATSAPP_MICROPHONE =
+            PHH_STATE_DIR + "/disable_wa_mic_fix";
+    private static final String DISABLE_FILE_REDUCE_TELEPHONY_EARPIECE_VOLUME =
+            PHH_STATE_DIR + "/disable_tel_earpiece";
 
     @VisibleForTesting
     static final int STOP_SAMPLE = 1;
@@ -278,6 +289,18 @@ public class SoundSettings extends DashboardFragment implements OnActivityResult
                 new EmergencyTonePreferenceController(context, fragment, lifecycle);
         final VibrateIconPreferenceController vibrateIconPreferenceController =
                 new VibrateIconPreferenceController(context, fragment, lifecycle);
+        final DisableFileSwitchPreferenceController reduceVoipEarpieceVolumeController =
+                new DisableFileSwitchPreferenceController(context,
+                        KEY_REDUCE_VOIP_EARPIECE_VOLUME,
+                        DISABLE_FILE_REDUCE_VOIP_EARPIECE_VOLUME);
+        final DisableFileSwitchPreferenceController fixWhatsappMicrophoneController =
+                new DisableFileSwitchPreferenceController(context,
+                        KEY_FIX_WHATSAPP_MICROPHONE,
+                        DISABLE_FILE_FIX_WHATSAPP_MICROPHONE);
+        final DisableFileSwitchPreferenceController reduceTelephonyEarpieceVolumeController =
+                new DisableFileSwitchPreferenceController(context,
+                        KEY_REDUCE_TELEPHONY_EARPIECE_VOLUME,
+                        DISABLE_FILE_REDUCE_TELEPHONY_EARPIECE_VOLUME);
 
         controllers.add(dialPadTonePreferenceController);
         controllers.add(screenLockSoundPreferenceController);
@@ -288,6 +311,9 @@ public class SoundSettings extends DashboardFragment implements OnActivityResult
         controllers.add(dockAudioMediaPreferenceController);
         controllers.add(bootSoundPreferenceController);
         controllers.add(emergencyTonePreferenceController);
+        controllers.add(reduceVoipEarpieceVolumeController);
+        controllers.add(fixWhatsappMicrophoneController);
+        controllers.add(reduceTelephonyEarpieceVolumeController);
         controllers.add(new PreferenceCategoryController(context,
                 "other_sounds_and_vibrations_category").setChildren(
                 Arrays.asList(dialPadTonePreferenceController,

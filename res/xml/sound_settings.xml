@@ -236,4 +236,28 @@
         android:fragment="com.android.settings.notification.SoundWorkSettings"
         android:order="100"
         settings:controller="com.android.settings.notification.WorkSoundsPreferenceController"/>
+
+    <PreferenceCategory
+        android:key="dumbdroid_audio_workarounds"
+        android:title="@string/dumbdroid_audio_workarounds_title"
+        android:order="110">
+
+        <SwitchPreferenceCompat
+            android:key="reduce_voip_earpiece_volume"
+            android:title="@string/reduce_voip_earpiece_volume_title"
+            android:summary="@string/phh_audio_tweak_reboot_summary"
+            android:order="10"/>
+
+        <SwitchPreferenceCompat
+            android:key="fix_whatsapp_microphone"
+            android:title="@string/fix_whatsapp_microphone_title"
+            android:summary="@string/phh_audio_tweak_reboot_summary"
+            android:order="20"/>
+
+        <SwitchPreferenceCompat
+            android:key="reduce_telephony_earpiece_volume"
+            android:title="@string/reduce_telephony_earpiece_volume_title"
+            android:summary="@string/phh_audio_tweak_reboot_summary"
+            android:order="30"/>
+    </PreferenceCategory>
 </PreferenceScreen>
