@@ -7714,6 +7714,21 @@
     <!-- Sound: Other sounds: Title for the option enabling boot sounds. [CHAR LIMIT=30] -->
     <string name="boot_sounds_title">Power on sounds</string>
 
+    <!-- Sound: PHH audio tweak toggle title for reducing VoIP earpiece volume. [CHAR LIMIT=50] -->
+    <string name="reduce_voip_earpiece_volume_title">Reduce VoIP earpiece volume</string>
+
+    <!-- Sound: Category title for Dumbdroid audio workaround toggles. [CHAR LIMIT=50] -->
+    <string name="dumbdroid_audio_workarounds_title">Dumbdroid audio workarounds</string>
+
+    <!-- Sound: PHH audio tweak toggle title for WhatsApp microphone fix. [CHAR LIMIT=50] -->
+    <string name="fix_whatsapp_microphone_title">Fix Whatsapp microphone</string>
+
+    <!-- Sound: PHH audio tweak toggle title for reducing telephony earpiece volume. [CHAR LIMIT=50] -->
+    <string name="reduce_telephony_earpiece_volume_title">Reduce telephony earpiece volume</string>
+
+    <!-- Sound: Summary for PHH audio tweak toggles when reboot is required. [CHAR LIMIT=50] -->
+    <string name="phh_audio_tweak_reboot_summary">Takes effect after reboot</string>
+
     <!-- Setting title for controlling how caption text display in real time [CHAR LIMIT=40]-->
     <string name="live_caption_title">Live Caption</string>
 
