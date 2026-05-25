@@ -113,6 +113,11 @@
             android:summary="@string/enable_16k_pages_summary"
             settings:useAdditionalSummary="true" />
 
+        <SwitchPreferenceCompat
+            android:key="disable_certhack"
+            android:title="@string/disable_certhack_title"
+            android:summary="@string/disable_certhack_summary" />
+
         <Preference
             android:key="running_apps"
             android:title="@string/runningservices_settings_title"

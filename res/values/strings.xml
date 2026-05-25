@@ -11980,6 +11980,10 @@
     <string name="enable_16k_pages">Boot with 16K page size</string>
     <!-- setting Checkbox summary whether to boot with 16K page size[CHAR_LIMIT=50] -->
     <string name="enable_16k_pages_summary">Boot device using 16K page size supported kernel</string>
+    <!-- Developer Settings: Title for disabling the Dumbdroid keystore attestation hook. -->
+    <string name="disable_certhack_title">Disable keystore CertHack</string>
+    <!-- Developer Settings: Summary for disabling the Dumbdroid keystore attestation hook. -->
+    <string name="disable_certhack_summary">Turns off Dumbdroid keystore attestation spoofing at runtime</string>
     <!-- Confirmation dialog title to ensure user wishes to enable 16K page size -->
     <string name="confirm_enable_16k_pages_title">Reboot with 16KB pages compatible kernel?</string>
     <!-- Warning dialog message to confirm user wishes to enable 16K page size -->
