@@ -76,10 +76,10 @@ public class BugReportInPowerPreferenceControllerTest {
     }
 
     @Test
-    public void isAvailable_noDebugRestriction_shouldReturnTrue() {
+    public void isAvailable_noDebugRestriction_shouldReturnFalse() {
         when(mUserManager.hasUserRestriction(anyString())).thenReturn(false);
 
-        assertThat(mController.isAvailable()).isTrue();
+        assertThat(mController.isAvailable()).isFalse();
     }
 
     @Test

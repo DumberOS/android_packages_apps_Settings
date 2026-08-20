@@ -17,7 +17,6 @@
 package com.android.settings.development;
 
 import android.content.Context;
-import android.os.UserManager;
 import android.provider.Settings;
 
 import androidx.annotation.VisibleForTesting;
@@ -38,16 +37,13 @@ public class BugReportInPowerPreferenceController extends
     @VisibleForTesting
     static int SETTING_VALUE_OFF = 0;
 
-    private final UserManager mUserManager;
-
     public BugReportInPowerPreferenceController(Context context) {
         super(context);
-        mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
     }
 
     @Override
     public boolean isAvailable() {
-        return !mUserManager.hasUserRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES);
+        return false;
     }
 
     @Override
