@@ -214,6 +214,12 @@
                 </intent>
             </Preference>
 
+            <Preference
+                android:key="switch_to_treble_app_ims"
+                android:title="@string/wifi_calling_treble_app_ims_title"
+                android:summary="@string/wifi_calling_treble_app_ims_summary"
+                settings:controller="com.android.settings.network.telephony.SwitchToTrebleAppImsPreferenceController"/>
+
             <SwitchPreferenceCompat
                 android:key="video_calling_key"
                 android:title="@string/video_calling_settings_title"

@@ -11963,6 +11963,18 @@
     <string name="wifi_calling_stock_ims_wfc_enable_failed">Couldn\u2019t enable Wi\u2011Fi calling for this SIM</string>
     <!-- Error shown when the stock IMS flag was created but Settings could not reboot. [CHAR LIMIT=NONE] -->
     <string name="wifi_calling_stock_ims_restart_manually">Stock IMS was enabled. Restart the phone to finish switching.</string>
+    <!-- Preference for returning from stock IMS to the TrebleApp IMS implementation. [CHAR LIMIT=60] -->
+    <string name="wifi_calling_treble_app_ims_title">Switch back to default Telephony</string>
+    <!-- Summary for returning from stock IMS to the TrebleApp IMS implementation. [CHAR LIMIT=NONE] -->
+    <string name="wifi_calling_treble_app_ims_summary">Disable Wi\u2011Fi calling and use the regular calling stack</string>
+    <!-- Confirmation dialog title for returning to TrebleApp IMS. [CHAR LIMIT=60] -->
+    <string name="wifi_calling_treble_app_ims_dialog_title">Switch back to default Telephony?</string>
+    <!-- Confirmation dialog message for returning to TrebleApp IMS. [CHAR LIMIT=NONE] -->
+    <string name="wifi_calling_treble_app_ims_dialog_message">The phone will disable Wi\u2011Fi calling, switch back to the default Telephony stack, and restart.</string>
+    <!-- Error shown when Settings cannot remove the stock IMS flag. [CHAR LIMIT=NONE] -->
+    <string name="wifi_calling_treble_app_ims_disable_failed">Couldn\u2019t switch back to the TrebleApp IMS stack</string>
+    <!-- Error shown when the stock IMS flag was removed but Settings could not reboot. [CHAR LIMIT=NONE] -->
+    <string name="wifi_calling_treble_app_ims_restart_manually">TrebleApp IMS was selected. Restart the phone to finish switching.</string>
 
     <!-- Title for enable MMS notification when trying to receive MMS.  [CHAR LIMIT=40] -->
     <string name="enable_receiving_mms_notification_title">Incoming MMS message</string>
