@@ -16,12 +16,17 @@
 
 package com.android.settings.network.telephony
 
+import android.app.AlertDialog
 import android.content.Context
+import android.os.PowerManager
+import android.os.SystemProperties
 import android.provider.Settings
 import android.telecom.TelecomManager
 import android.telephony.SubscriptionManager
 import android.telephony.TelephonyManager
 import android.telephony.ims.ImsMmTelManager
+import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -35,6 +40,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.IOException
 
 /**
  * Preference controller for "Wifi Calling".
@@ -49,6 +56,13 @@ open class WifiCallingPreferenceController @JvmOverloads constructor(
         WifiCallingRepository(context, subId)
     },
 ) : TelephonyBasePreferenceController(context, key) {
+
+    private companion object {
+        const val TAG = "WifiCallingPreference"
+        const val STOCK_MTK_IMS_PROPERTY = "sys.phh.stock_mtk_ims"
+        const val STOCK_MTK_IMS_FLAG = "/metadata/phh/dumber_mini_stock_ims"
+        const val VENDOR_MODEL_PROPERTY = "ro.product.vendor.model"
+    }
 
     private lateinit var preference: Preference
     private lateinit var callingPreferenceCategoryController: CallingPreferenceCategoryController
@@ -76,14 +90,23 @@ open class WifiCallingPreferenceController @JvmOverloads constructor(
     override fun displayPreference(screen: PreferenceScreen) {
         // Not call super here, to avoid preference.isVisible changed unexpectedly
         preference = screen.findPreference(preferenceKey)!!
-        preference.intent?.putExtra(Settings.EXTRA_SUB_ID, mSubId)
+        if (shouldOfferStockMtkImsMigration()) {
+            preference.intent = null
+            preference.setOnPreferenceClickListener {
+                showStockMtkImsMigrationDialog()
+                true
+            }
+        } else {
+            preference.intent?.putExtra(Settings.EXTRA_SUB_ID, mSubId)
+        }
     }
 
     override fun onViewCreated(viewLifecycleOwner: LifecycleOwner) {
         wifiCallingRepositoryFactory(mSubId).wifiCallingReadyFlow()
             .collectLatestWithLifecycle(viewLifecycleOwner) {
-                preference.isVisible = it
-                callingPreferenceCategoryController.updateChildVisible(preferenceKey, it)
+                val visible = it || shouldOfferStockMtkImsMigration()
+                preference.isVisible = visible
+                callingPreferenceCategoryController.updateChildVisible(preferenceKey, visible)
             }
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -98,6 +121,14 @@ open class WifiCallingPreferenceController @JvmOverloads constructor(
     }
 
     private suspend fun update() {
+        if (shouldOfferStockMtkImsMigration()) {
+            preference.title = resourcesForSub.getString(R.string.wifi_calling_settings_title)
+            preference.summary = resourcesForSub.getString(
+                R.string.wifi_calling_stock_ims_required_summary
+            )
+            return
+        }
+
         val simCallManager = mContext.getSystemService(TelecomManager::class.java)
             ?.getSimCallManagerForSubscription(mSubId)
         if (simCallManager != null) {
@@ -131,5 +162,79 @@ open class WifiCallingPreferenceController @JvmOverloads constructor(
             else -> com.android.internal.R.string.wifi_calling_off_summary
         }
         return resourcesForSub.getString(resId)
+    }
+
+    private fun shouldOfferStockMtkImsMigration(): Boolean {
+        if (SystemProperties.getBoolean(STOCK_MTK_IMS_PROPERTY, false)) return false
+
+        val vendorModel = SystemProperties.get(VENDOR_MODEL_PROPERTY, "").trim()
+        return vendorModel.equals("Dumber mini", ignoreCase = true) ||
+            vendorModel.equals("S9", ignoreCase = true)
+    }
+
+    private fun showStockMtkImsMigrationDialog() {
+        AlertDialog.Builder(mContext)
+            .setTitle(R.string.wifi_calling_stock_ims_dialog_title)
+            .setMessage(R.string.wifi_calling_stock_ims_dialog_message)
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.wifi_calling_stock_ims_restart_button) { _, _ ->
+                enableStockMtkImsAndReboot()
+            }
+            .show()
+    }
+
+    private fun enableStockMtkImsAndReboot() {
+        if (!enableWifiCallingForSubscription()) {
+            showMigrationToast(R.string.wifi_calling_stock_ims_wfc_enable_failed)
+            return
+        }
+
+        val flag = File(STOCK_MTK_IMS_FLAG)
+        try {
+            val parent = flag.parentFile
+            if (parent != null && !parent.exists() && !parent.mkdirs()) {
+                throw IOException("Failed to create ${parent.absolutePath}")
+            }
+            if (!flag.exists() && !flag.createNewFile()) {
+                throw IOException("Failed to create ${flag.absolutePath}")
+            }
+        } catch (e: IOException) {
+            Log.e(TAG, "Failed to enable the stock MTK IMS stack", e)
+            showMigrationToast(R.string.wifi_calling_stock_ims_enable_failed)
+            return
+        } catch (e: SecurityException) {
+            Log.e(TAG, "Permission denied enabling the stock MTK IMS stack", e)
+            showMigrationToast(R.string.wifi_calling_stock_ims_enable_failed)
+            return
+        }
+
+        try {
+            val powerManager = mContext.getSystemService(PowerManager::class.java)
+                ?: throw IllegalStateException("PowerManager unavailable")
+            powerManager.reboot("stock_mtk_ims")
+        } catch (e: RuntimeException) {
+            Log.e(TAG, "Failed to reboot after enabling the stock MTK IMS stack", e)
+            showMigrationToast(R.string.wifi_calling_stock_ims_restart_manually)
+        }
+    }
+
+    private fun enableWifiCallingForSubscription(): Boolean {
+        return try {
+            // The Treble IMS stack reports WFC as unprovisioned, making the normal
+            // setter return without saving the value. Persist it for the stock stack.
+            SubscriptionManager.setSubscriptionProperty(
+                mSubId,
+                SubscriptionManager.WFC_IMS_ENABLED,
+                "1"
+            )
+            ImsMmTelManager.createForSubscriptionId(mSubId).isVoWiFiSettingEnabled
+        } catch (e: RuntimeException) {
+            Log.e(TAG, "Failed to enable Wi-Fi calling for subId $mSubId", e)
+            false
+        }
+    }
+
+    private fun showMigrationToast(message: Int) {
+        Toast.makeText(mContext, message, Toast.LENGTH_LONG).show()
     }
 }
