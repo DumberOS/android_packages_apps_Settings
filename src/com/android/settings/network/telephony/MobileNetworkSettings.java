@@ -282,8 +282,6 @@ public class MobileNetworkSettings extends AbstractMobileNetworkSettings impleme
                 use(CallingPreferenceCategoryController.class);
         use(WifiCallingPreferenceController.class)
                 .init(mSubId, callingPreferenceCategoryController);
-        use(SwitchToTrebleAppImsPreferenceController.class)
-                .init(mSubId, callingPreferenceCategoryController);
 
         final OpenNetworkSelectPagePreferenceController openNetworkSelectPagePreferenceController =
                 use(OpenNetworkSelectPagePreferenceController.class).init(mSubId);

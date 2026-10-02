@@ -20,21 +20,17 @@ import android.app.AlertDialog
 import android.content.Context
 import android.os.PowerManager
 import android.os.SystemProperties
-import android.telephony.SubscriptionManager
-import android.telephony.TelephonyManager
 import android.util.Log
 import android.widget.Toast
-import androidx.lifecycle.LifecycleOwner
 import androidx.preference.Preference
-import androidx.preference.PreferenceScreen
 import com.android.settings.R
-import com.android.settingslib.spa.framework.util.collectLatestWithLifecycle
+import com.android.settings.core.BasePreferenceController
 import java.io.File
 import java.io.IOException
 
 /** Allows users of the stock MTK IMS stack to return to TrebleApp IMS. */
 class SwitchToTrebleAppImsPreferenceController(context: Context, key: String) :
-    TelephonyBasePreferenceController(context, key) {
+    BasePreferenceController(context, key) {
 
     private companion object {
         const val TAG = "SwitchToTrebleAppIms"
@@ -42,35 +38,10 @@ class SwitchToTrebleAppImsPreferenceController(context: Context, key: String) :
         const val STOCK_MTK_IMS_FLAG = "/metadata/phh/dumber_mini_stock_ims"
     }
 
-    private lateinit var preference: Preference
-    private lateinit var callingPreferenceCategoryController: CallingPreferenceCategoryController
-
-    fun init(
-        subId: Int,
-        callingPreferenceCategoryController: CallingPreferenceCategoryController,
-    ): SwitchToTrebleAppImsPreferenceController {
-        mSubId = subId
-        this.callingPreferenceCategoryController = callingPreferenceCategoryController
-        return this
-    }
-
-    override fun getAvailabilityStatus(subId: Int): Int = when {
-        SubscriptionManager.isValidSubscriptionId(subId) && isStockMtkImsActive() -> AVAILABLE
+    // Recovery must not depend on subscriptions or callbacks from a crashing phone process.
+    override fun getAvailabilityStatus(): Int = when {
+        isStockMtkImsActive() -> AVAILABLE
         else -> CONDITIONALLY_UNAVAILABLE
-    }
-
-    override fun displayPreference(screen: PreferenceScreen) {
-        super.displayPreference(screen)
-        preference = screen.findPreference(preferenceKey)!!
-        val visible = isStockMtkImsActive()
-        preference.isVisible = visible
-        callingPreferenceCategoryController.updateChildVisible(preferenceKey, visible)
-    }
-
-    override fun onViewCreated(viewLifecycleOwner: LifecycleOwner) {
-        mContext.callStateFlow(mSubId).collectLatestWithLifecycle(viewLifecycleOwner) {
-            preference.isEnabled = (it == TelephonyManager.CALL_STATE_IDLE)
-        }
     }
 
     override fun handlePreferenceTreeClick(preference: Preference): Boolean {

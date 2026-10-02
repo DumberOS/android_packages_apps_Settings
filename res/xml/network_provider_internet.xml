@@ -55,6 +55,14 @@
         settings:useAdminDisabledSummary="true"
         settings:searchable="@bool/config_show_sim_info"/>
 
+    <Preference
+        android:key="switch_to_treble_app_ims"
+        android:title="@string/wifi_calling_treble_app_ims_title"
+        android:summary="@string/wifi_calling_treble_app_ims_summary"
+        android:icon="@drawable/ic_calls_sms"
+        android:order="-10"
+        settings:controller="com.android.settings.network.telephony.SwitchToTrebleAppImsPreferenceController"/>
+
     <com.android.settingslib.RestrictedSwitchPreference
         android:key="airplane_mode"
         android:title="@string/airplane_mode"
