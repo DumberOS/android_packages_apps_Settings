@@ -163,7 +163,9 @@ public class PrivateDnsPreferenceController extends BasePreferenceController
     private boolean isManagedByAdmin() {
         EnforcedAdmin enforcedAdmin = RestrictedLockUtilsInternal.checkIfRestrictionEnforced(
                 mContext, UserManager.DISALLOW_CONFIG_PRIVATE_DNS, UserHandle.myUserId());
-        return enforcedAdmin != null;
+        // App Blocker uses a platform/system restriction, not a device-owner policy.
+        return enforcedAdmin != null || mContext.getSystemService(UserManager.class)
+                .hasUserRestriction(UserManager.DISALLOW_CONFIG_PRIVATE_DNS);
     }
 
     private class PrivateDnsSettingsObserver extends ContentObserver {
