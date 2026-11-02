@@ -11954,7 +11954,7 @@
     <!-- Title of the confirmation dialog for switching IMS stacks. [CHAR LIMIT=60] -->
     <string name="wifi_calling_stock_ims_dialog_title">Enable Wi\u2011Fi calling?</string>
     <!-- Explanation shown before switching IMS stacks and rebooting. [CHAR LIMIT=NONE] -->
-    <string name="wifi_calling_stock_ims_dialog_message">Wi\u2011Fi calling requires switching to an experimental telephony stack and rebooting the phone. If you experience any issues with calling or texting, you can switch back through this menu.</string>
+    <string name="wifi_calling_stock_ims_dialog_message">Wi\u2011Fi calling requires switching to stock telephony and restarting the phone. The phone may restart twice. If you experience any issues with calling or texting, you can switch to legacy telephony through this menu.</string>
     <!-- Button that confirms the IMS stack switch and immediately reboots. [CHAR LIMIT=30] -->
     <string name="wifi_calling_stock_ims_restart_button">Switch and restart</string>
     <!-- Error shown when Settings cannot create the stock IMS flag. [CHAR LIMIT=NONE] -->
@@ -11964,13 +11964,13 @@
     <!-- Error shown when the stock IMS flag was created but Settings could not reboot. [CHAR LIMIT=NONE] -->
     <string name="wifi_calling_stock_ims_restart_manually">Stock IMS was enabled. Restart the phone to finish switching.</string>
     <!-- Preference for returning from stock IMS to the TrebleApp IMS implementation. [CHAR LIMIT=60] -->
-    <string name="wifi_calling_treble_app_ims_title">Switch back to default Telephony</string>
+    <string name="wifi_calling_treble_app_ims_title">Switch to legacy telephony</string>
     <!-- Summary for returning from stock IMS to the TrebleApp IMS implementation. [CHAR LIMIT=NONE] -->
-    <string name="wifi_calling_treble_app_ims_summary">Disable Wi\u2011Fi calling and use the regular calling stack</string>
+    <string name="wifi_calling_treble_app_ims_summary">Disable Wi\u2011Fi calling and use legacy telephony</string>
     <!-- Confirmation dialog title for returning to TrebleApp IMS. [CHAR LIMIT=60] -->
-    <string name="wifi_calling_treble_app_ims_dialog_title">Switch back to default Telephony?</string>
+    <string name="wifi_calling_treble_app_ims_dialog_title">Switch to legacy telephony?</string>
     <!-- Confirmation dialog message for returning to TrebleApp IMS. [CHAR LIMIT=NONE] -->
-    <string name="wifi_calling_treble_app_ims_dialog_message">The phone will disable Wi\u2011Fi calling, switch back to the default Telephony stack, and restart.</string>
+    <string name="wifi_calling_treble_app_ims_dialog_message">The phone will disable Wi\u2011Fi calling, switch to legacy telephony, and restart. The phone may restart twice.</string>
     <!-- Error shown when Settings cannot remove the stock IMS flag. [CHAR LIMIT=NONE] -->
     <string name="wifi_calling_treble_app_ims_disable_failed">Couldn\u2019t switch back to the TrebleApp IMS stack</string>
     <!-- Error shown when the stock IMS flag was removed but Settings could not reboot. [CHAR LIMIT=NONE] -->
