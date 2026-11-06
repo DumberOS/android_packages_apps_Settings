@@ -196,10 +196,7 @@ public class PrivateDnsModeDialogPreference extends CustomDialogPreferenceCompat
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
-        // A policy can be enabled while this dialog is already open.
-        if (which == DialogInterface.BUTTON_POSITIVE
-                && !getContext().getSystemService(UserManager.class)
-                        .hasUserRestriction(UserManager.DISALLOW_CONFIG_PRIVATE_DNS)) {
+        if (which == DialogInterface.BUTTON_POSITIVE) {
             final Context context = getContext();
             int modeToSet = mMode;
             if (mMode == PRIVATE_DNS_MODE_PROVIDER_HOSTNAME) {
