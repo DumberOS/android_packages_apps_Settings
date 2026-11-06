@@ -196,8 +196,10 @@ public class PrivateDnsModeDialogPreference extends CustomDialogPreferenceCompat
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
-        // Recheck at save time: the restriction can change while this dialog is open.
-        if (which == DialogInterface.BUTTON_POSITIVE && !isPrivateDnsRestricted()) {
+        // A policy can be enabled while this dialog is already open.
+        if (which == DialogInterface.BUTTON_POSITIVE
+                && !getContext().getSystemService(UserManager.class)
+                        .hasUserRestriction(UserManager.DISALLOW_CONFIG_PRIVATE_DNS)) {
             final Context context = getContext();
             int modeToSet = mMode;
             if (mMode == PRIVATE_DNS_MODE_PROVIDER_HOSTNAME) {
@@ -248,21 +250,18 @@ public class PrivateDnsModeDialogPreference extends CustomDialogPreferenceCompat
     public void performClick() {
         EnforcedAdmin enforcedAdmin = getEnforcedAdmin();
 
-        if (enforcedAdmin != null) {
-            RestrictedLockUtils.sendShowAdminSupportDetailsIntent(getContext(), enforcedAdmin);
-        } else if (!isPrivateDnsRestricted()) {
+        if (enforcedAdmin == null) {
+            // If the restriction is not restricted by admin, continue as usual.
             super.performClick();
+        } else {
+            // Show a dialog explaining to the user why they cannot change the preference.
+            RestrictedLockUtils.sendShowAdminSupportDetailsIntent(getContext(), enforcedAdmin);
         }
     }
 
     private EnforcedAdmin getEnforcedAdmin() {
         return RestrictedLockUtilsInternal.checkIfRestrictionEnforced(
                 getContext(), UserManager.DISALLOW_CONFIG_PRIVATE_DNS, UserHandle.myUserId());
-    }
-
-    private boolean isPrivateDnsRestricted() {
-        return getContext().getSystemService(UserManager.class)
-                .hasUserRestriction(UserManager.DISALLOW_CONFIG_PRIVATE_DNS);
     }
 
     private boolean isDisabledByAdmin() {
@@ -284,8 +283,9 @@ public class PrivateDnsModeDialogPreference extends CustomDialogPreferenceCompat
         }
         final Button saveButton = getSaveButton();
         if (saveButton != null) {
-            saveButton.setEnabled(!isPrivateDnsRestricted() && (!modeProvider
-                    || InternetDomainName.isValid(mEditText.getText().toString())));
+            saveButton.setEnabled(modeProvider
+                    ? InternetDomainName.isValid(mEditText.getText().toString())
+                    : true);
         }
     }
 }
