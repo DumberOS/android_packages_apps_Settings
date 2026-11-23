@@ -76,6 +76,7 @@ fun AllAppListPage(
         listModel = rememberContext(::AllAppListModel),
         showInstantApps = true,
         matchAnyUserForAdmin = true,
+        dpadNavigation = true,
         moreOptions = { ResetAppPreferences(resetAppDialogPresenter::open) },
         appList = appList,
     )

@@ -23,12 +23,14 @@ import android.content.pm.ApplicationInfo
 import android.os.UserManager
 import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.android.settings.R
@@ -53,6 +55,8 @@ fun AppInfoSettingsMoreOptions(
     packageInfoPresenter: PackageInfoPresenter,
     app: ApplicationInfo,
     packageManagers: IPackageManagers = PackageManagers,
+    modifier: Modifier = Modifier,
+    onVisibilityChanged: (Boolean) -> Unit = {},
 ) {
     val state = app.produceState(packageManagers).value ?: return
     var restrictedSettingsAllowed by rememberSaveable { mutableStateOf(false) }
@@ -60,7 +64,11 @@ fun AppInfoSettingsMoreOptions(
         !state.shownUninstallForAllUsers &&
         !(state.shouldShowAccessRestrictedSettings && !restrictedSettingsAllowed)
     ) return
-    MoreOptionsAction {
+    DisposableEffect(Unit) {
+        onVisibilityChanged(true)
+        onDispose { onVisibilityChanged(false) }
+    }
+    MoreOptionsAction(modifier) {
         val restrictions =
             Restrictions(userId = app.userId, keys = listOf(UserManager.DISALLOW_APPS_CONTROL))
         if (state.shownUninstallUpdates) {

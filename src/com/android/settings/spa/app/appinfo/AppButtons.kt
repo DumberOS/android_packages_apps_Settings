@@ -19,8 +19,21 @@ package com.android.settings.spa.app.appinfo
 import android.content.pm.ApplicationInfo
 import android.content.pm.FeatureFlags as PmFeatureFlags
 import android.content.pm.FeatureFlagsImpl as PmFeatureFlagsImpl
+import androidx.compose.foundation.focusGroup
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.InputMode
+import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.settingslib.applications.AppUtils
 import com.android.settingslib.spa.widget.button.ActionButton
@@ -34,17 +47,31 @@ import kotlinx.coroutines.flow.MutableStateFlow
 fun AppButtons(
     packageInfoPresenter: PackageInfoPresenter,
     isHibernationSwitchEnabledStateFlow: MutableStateFlow<Boolean>,
-    featureFlags: PmFeatureFlags = PmFeatureFlagsImpl()
+    featureFlags: PmFeatureFlags = PmFeatureFlagsImpl(),
+    focusRequester: FocusRequester? = null,
+    upFocusRequester: FocusRequester = FocusRequester.Default,
+    downFocusRequester: FocusRequester = FocusRequester.Default,
+    onActionsAvailable: (Boolean) -> Unit = {},
 ) {
-    if (remember(packageInfoPresenter) { packageInfoPresenter.isMainlineModule() }) return
-    val presenter = remember {
-        AppButtonsPresenter(
-            packageInfoPresenter,
-            isHibernationSwitchEnabledStateFlow,
-            featureFlags
-        )
+    val isMainlineModule = remember(packageInfoPresenter) {
+        packageInfoPresenter.isMainlineModule()
     }
-    ActionButtons(actionButtons = presenter.getActionButtons())
+    val buttons = if (isMainlineModule) emptyList() else {
+        val presenter = remember {
+            AppButtonsPresenter(
+                packageInfoPresenter,
+                isHibernationSwitchEnabledStateFlow,
+                featureFlags
+            )
+        }
+        presenter.getActionButtons()
+    }
+    SideEffect { onActionsAvailable(buttons.any { it.enabled }) }
+    if (focusRequester == null) {
+        if (!isMainlineModule) ActionButtons(actionButtons = buttons)
+    } else {
+        AppInfoActionButtons(buttons, focusRequester, upFocusRequester, downFocusRequester)
+    }
 }
 
 private fun PackageInfoPresenter.isMainlineModule(): Boolean =
@@ -67,7 +94,7 @@ private class AppButtonsPresenter(
 
     @Composable
     fun getActionButtons() =
-        packageInfoPresenter.flow.collectAsStateWithLifecycle(initialValue = null).value?.let {
+        packageInfoPresenter.flow.collectAsStateWithLifecycle().value?.let {
             getActionButtons(checkNotNull(it.applicationInfo))
         } ?: emptyList()
 
@@ -88,4 +115,45 @@ private class AppButtonsPresenter(
         appClearButton.getActionButton(app),
         appForceStopButton.getActionButton(app),
     )
+}
+
+/** Explicit routes keep horizontal movement in the action row, skipping disabled actions. */
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+internal fun AppInfoActionButtons(
+    buttons: List<ActionButton>,
+    focusRequester: FocusRequester,
+    upFocusRequester: FocusRequester,
+    downFocusRequester: FocusRequester,
+) {
+    val requesters = remember(buttons.size) { List(buttons.size) { FocusRequester() } }
+    val inputModeManager = LocalInputModeManager.current
+    var initialFocusRequested by remember { mutableStateOf(false) }
+    val firstEnabled = buttons.indexOfFirst { it.enabled }
+    if (buttons.isNotEmpty()) ActionButtons(
+        actionButtons = buttons,
+        modifier = Modifier.focusRequester(focusRequester).focusGroup(),
+        buttonModifier = { index ->
+            Modifier.focusRequester(requesters[index]).focusProperties {
+                left = (index - 1 downTo 0).firstOrNull { buttons[it].enabled }
+                    ?.let { requesters[it] } ?: FocusRequester.Cancel
+                right = (index + 1 until buttons.size).firstOrNull { buttons[it].enabled }
+                    ?.let { requesters[it] } ?: FocusRequester.Cancel
+                up = upFocusRequester
+                down = downFocusRequester
+            }
+        },
+    )
+    LaunchedEffect(firstEnabled) {
+        if (!initialFocusRequested) {
+            inputModeManager.requestInputMode(InputMode.Keyboard)
+            if (firstEnabled >= 0) {
+                requesters[firstEnabled].requestFocus()
+            } else if (downFocusRequester != FocusRequester.Default) {
+                // Mainline modules and restricted apps may have no enabled action buttons.
+                downFocusRequester.requestFocus()
+            }
+            initialFocusRequested = true
+        }
+    }
 }

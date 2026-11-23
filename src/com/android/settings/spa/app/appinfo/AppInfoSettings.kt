@@ -22,7 +22,21 @@ import android.os.Bundle
 import android.os.SystemProperties
 import android.os.UserHandle
 import android.util.FeatureFlagUtils
+import androidx.compose.foundation.focusGroup
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
@@ -46,7 +60,7 @@ import com.android.settings.spa.app.specialaccess.PictureInPictureListProvider
 import com.android.settings.spa.app.specialaccess.VoiceActivationAppsListProvider
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.navigator
-import com.android.settingslib.spa.widget.scaffold.RegularScaffold
+import com.android.settingslib.spa.widget.scaffold.SettingsScaffold
 import com.android.settingslib.spa.widget.ui.Category
 import com.android.settingslib.spaprivileged.model.app.toRoute
 import com.android.settingslib.spaprivileged.template.app.AppInfoProvider
@@ -120,65 +134,101 @@ object AppInfoSettingsProvider : SettingsPageProvider {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun AppInfoSettings(packageInfoPresenter: PackageInfoPresenter) {
     val packageInfoState = packageInfoPresenter.flow.collectAsStateWithLifecycle()
     val featureFlags: PmFeatureFlags = PmFeatureFlagsImpl()
-    RegularScaffold(
+    val actionFocus = remember { FocusRequester() }
+    val moreOptionsFocus = remember { FocusRequester() }
+    val preferencesFocus = remember { FocusRequester() }
+    var moreOptionsVisible by remember { mutableStateOf(false) }
+    var actionsAvailable by remember { mutableStateOf(false) }
+    SettingsScaffold(
         title = stringResource(R.string.application_info_label),
+        navigationIconModifier = Modifier.focusProperties { canFocus = false },
         actions = {
             packageInfoState.value?.applicationInfo?.let { app ->
                 if (isArchivingEnabled(featureFlags)) TopBarAppLaunchButton(packageInfoPresenter, app)
-                AppInfoSettingsMoreOptions(packageInfoPresenter, app)
+                AppInfoSettingsMoreOptions(
+                    packageInfoPresenter,
+                    app,
+                    modifier = Modifier.focusRequester(moreOptionsFocus).focusProperties {
+                        down = if (actionsAvailable) actionFocus else preferencesFocus
+                    },
+                    onVisibilityChanged = { moreOptionsVisible = it },
+                )
             }
         }
-    ) {
-        val packageInfo = packageInfoState.value ?: return@RegularScaffold
-        val app = packageInfo.applicationInfo ?: return@RegularScaffold
+    ) { paddingValues ->
+        val packageInfo = packageInfoState.value ?: return@SettingsScaffold
+        val app = packageInfo.applicationInfo ?: return@SettingsScaffold
         val appInfoProvider = remember(packageInfo) { AppInfoProvider(packageInfo) }
-        val isHibernationSwitchEnabledStateFlow = MutableStateFlow(false)
+        val isHibernationSwitchEnabledStateFlow = remember { MutableStateFlow(false) }
 
-        appInfoProvider.AppInfo()
+        // Keep the scroll viewport below the app bar so bring-into-view also works when
+        // navigating upward with DPAD (a spacer inside the scroll content can be scrolled away).
+        Column(Modifier.padding(paddingValues).verticalScroll(rememberScrollState())) {
+            appInfoProvider.AppInfo()
 
-        AppButtons(packageInfoPresenter, isHibernationSwitchEnabledStateFlow)
+            AppButtons(
+                packageInfoPresenter,
+                isHibernationSwitchEnabledStateFlow,
+                focusRequester = actionFocus,
+                upFocusRequester = if (moreOptionsVisible) moreOptionsFocus else FocusRequester.Cancel,
+                downFocusRequester = preferencesFocus,
+                onActionsAvailable = { actionsAvailable = it },
+            )
 
-        AppSettingsPreference(app)
-        AppAllServicesPreference(app)
-        AppNotificationPreference(app)
-        AppPermissionPreference(app)
-        AppStoragePreference(app)
-        InstantAppDomainsPreference(app)
-        AppDataUsagePreference(app)
-        AppTimeSpentPreference(app)
-        AppBatteryPreference(app)
-        AppLocalePreference(app)
-        AppOpenByDefaultPreference(app)
-        DefaultAppShortcuts(app)
+            Column(Modifier.focusRequester(preferencesFocus).focusProperties {
+                exit = { direction ->
+                    when {
+                        direction != FocusDirection.Up -> FocusRequester.Default
+                        actionsAvailable -> actionFocus
+                        moreOptionsVisible -> moreOptionsFocus
+                        else -> FocusRequester.Cancel
+                    }
+                }
+            }.focusGroup()) {
+                AppSettingsPreference(app)
+                AppAllServicesPreference(app)
+                AppNotificationPreference(app)
+                AppPermissionPreference(app)
+                AppStoragePreference(app)
+                InstantAppDomainsPreference(app)
+                AppDataUsagePreference(app)
+                AppTimeSpentPreference(app)
+                AppBatteryPreference(app)
+                AppLocalePreference(app)
+                AppOpenByDefaultPreference(app)
+                DefaultAppShortcuts(app)
 
-        Category(title = stringResource(R.string.unused_apps_category)) {
-            HibernationSwitchPreference(app, isHibernationSwitchEnabledStateFlow)
-        }
+                Category(title = stringResource(R.string.unused_apps_category)) {
+                    HibernationSwitchPreference(app, isHibernationSwitchEnabledStateFlow)
+                }
 
-        Category(title = stringResource(R.string.advanced_apps)) {
-            UserAspectRatioAppPreference(app)
-            DisplayOverOtherAppsAppListProvider.InfoPageEntryItem(app)
-            ModifySystemSettingsAppListProvider.InfoPageEntryItem(app)
-            PictureInPictureListProvider.InfoPageEntryItem(app)
-            InstallUnknownAppsListProvider.InfoPageEntryItem(app)
-            InteractAcrossProfilesDetailsPreference(app)
-            AlarmsAndRemindersAppListProvider.InfoPageEntryItem(app)
-            if (Flags.enableVoiceActivationAppsInSettings()) {
-                VoiceActivationAppsListProvider.InfoPageEntryItem(app)
+                Category(title = stringResource(R.string.advanced_apps)) {
+                    UserAspectRatioAppPreference(app)
+                    DisplayOverOtherAppsAppListProvider.InfoPageEntryItem(app)
+                    ModifySystemSettingsAppListProvider.InfoPageEntryItem(app)
+                    PictureInPictureListProvider.InfoPageEntryItem(app)
+                    InstallUnknownAppsListProvider.InfoPageEntryItem(app)
+                    InteractAcrossProfilesDetailsPreference(app)
+                    AlarmsAndRemindersAppListProvider.InfoPageEntryItem(app)
+                    if (Flags.enableVoiceActivationAppsInSettings()) {
+                        VoiceActivationAppsListProvider.InfoPageEntryItem(app)
+                    }
+                    if (Flags.enablePerformBackupTasksInSettings()) {
+                        BackupTasksAppsListProvider.InfoPageEntryItem(app)
+                    }
+                }
+
+                Category(title = stringResource(R.string.app_install_details_group_title)) {
+                    AppInstallerInfoPreference(app)
+                }
+                appInfoProvider.FooterAppVersion()
             }
-            if (Flags.enablePerformBackupTasksInSettings()) {
-                BackupTasksAppsListProvider.InfoPageEntryItem(app)
-            }
         }
-
-        Category(title = stringResource(R.string.app_install_details_group_title)) {
-            AppInstallerInfoPreference(app)
-        }
-        appInfoProvider.FooterAppVersion()
     }
 }
 
